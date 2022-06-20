@@ -11,6 +11,19 @@ require("boot")
 #a la vez elegir elementos de la muestra que cumplan con la condicional de estar ocupados, ser mayores de 18 años y vivir en Bogota (usar el dominio BOGOTA)
 
 data <- read.xlsx("C:\\Users\\DELL\\OneDrive - Universidad de los Andes\\MECA 2022_2023\\BIGDATA\\TALLERES\\Taller_1\\Database.xlsx",sheet="Sheet1")
+
+data$Escol <- with(data, ifelse(
+  maxEducLevel == 1, 0, ifelse(
+    maxEducLevel == 2, 2, ifelse(
+      maxEducLevel == 3, 6, ifelse(
+        maxEducLevel == 4, 7, ifelse(
+          maxEducLevel== 5, 12, ifelse(
+            maxEducLevel == 6, 13, ifelse(
+              maxEducLevel == 7, 19, "Estudien vagos"
+            )
+          )
+        ))))))
+
 data_clean <- select(data, "directorio","secuencia_p","orden","clase",
                      "dominio","mes","estrato1","sex","age", "p6210", "maxEducLevel","regSalud","cotPension",
                      "sizeFirm","oficio","wap","ocu","dsi","pea","inac",	"totalHoursWorked","formal",
@@ -19,6 +32,11 @@ data_clean_ocu  <- subset(data_clean,data_clean$ocu == 1 & data_clean$age >= 18 
                             data_clean$dominio == "BOGOTA" ) %>% drop_na()
   
 data_clean_ocu$agesqr <- data_clean_ocu$age^2
+
+# Experiencia
+data_clean_ocu$exp <- data_clean_ocu$age-5- as.numeric(data_clean_ocu$Escol)ifelse(
+  as.numeric(data_clean_ocu$Escol) < 0
+  )
 
 View(data_clean_ocu) 
 

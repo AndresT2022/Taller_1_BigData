@@ -16,6 +16,12 @@ library(dplyr)
 library(jsonlite)
 library("writexl")
 
+# mi_pagina <- "https://ignaciomsarmiento.github.io/GEIH2018_sample/"
+# browseURL(mi_pagina)
+# mi_html<-read_html(mi_pagina) 
+# mi_html %>% html_node(xpath = '/html/body/div/div/div[2]/div/table') %>% html_text()
+## se identifica problema, el elemento está vacio
+
 data <- data.frame()
 for (i in 1:10){           
   x=paste0("https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_page_",i,".html")

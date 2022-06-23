@@ -1,4 +1,5 @@
-install.packages("recipes")
+#install.packages("recipes") 
+#rm=list(ls=()
 library(tidyverse)
 library(mosaic)
 library(recipes)
@@ -10,11 +11,11 @@ require("boot")
 ## Data Cleaning: Se toma la base se seleccionan 28 potenciales variables explicativas. La limpieza consiste en
 #a la vez elegir elementos de la muestra que cumplan con la condicional de estar ocupados, ser mayores de 18 años y vivir en Bogota (usar el dominio BOGOTA)
 
-#data <- read.xlsx("C:\\Users\\DELL\\OneDrive - Universidad de los Andes\\MECA 2022_2023\\BIGDATA\\TALLERES\\Taller_1\\Database.xlsx",sheet="Sheet1")
-data <- read.xlsx("D:\\Documents\\Andres\\ANDES\\2.5\\Taller_1_BigData\\Database.xlsx",sheet="Sheet1")
+data <- read.xlsx("C:\\Users\\DELL\\OneDrive - Universidad de los Andes\\MECA 2022_2023\\BIGDATA\\TALLERES\\Taller_1\\Database.xlsx",sheet="Sheet1")
+#data <- read.xlsx("D:\\Documents\\Andres\\ANDES\\2.5\\Taller_1_BigData\\Database.xlsx",sheet="Sheet1")
 
 
-
+data$LnIng <- log(data$y_total_m)
 data$Escol <- with(data, ifelse(
   maxEducLevel == 1, 0, ifelse(
     maxEducLevel == 2, 2, ifelse(
@@ -22,7 +23,7 @@ data$Escol <- with(data, ifelse(
         maxEducLevel == 4, 7, ifelse(
           maxEducLevel== 5, 12, ifelse(
             maxEducLevel == 6, 13, ifelse(
-              maxEducLevel == 7, 19, "Estudien vagos"
+              maxEducLevel == 7, 19, "No data"
             )
           )
         ))))))
@@ -30,8 +31,8 @@ data$Escol <- with(data, ifelse(
 data_clean <- select(data, "directorio","secuencia_p","orden","clase",
                      "dominio","mes","estrato1","sex","age", "p6210", "maxEducLevel","regSalud","cotPension",
                      "sizeFirm","oficio","wap","ocu","dsi","pea","inac",	"totalHoursWorked","formal",
-                     "informal","cuentaPropia","microEmpresa","college","Escol","y_total_m","y_total_m_ha") 
-data_clean_ocu  <- subset(data_clean,data_clean$ocu == 1 & data_clean$age >= 18 & data_clean$age <= 62  & 
+                     "informal","cuentaPropia","microEmpresa","college","Escol","y_total_m","y_total_m_ha","LnIng") 
+data_clean_ocu  <- subset(data_clean,data_clean$ocu == 1 & data_clean$age >= 18 & data_clean$age <= 80  & 
                             data_clean$dominio == "BOGOTA" ) %>% drop_na()
   
 data_clean_ocu$agesqr <- data_clean_ocu$age^2
@@ -42,7 +43,6 @@ data_clean_ocu$exp <- with(data_clean_ocu, ifelse(
   data_clean_ocu$exp < 0,0,data_clean_ocu$exp
   ))
 
-View(data_clean_ocu) 
 
 ## Perfil ingreso-edad: Se toma una regresión lineal que evalue la relación entre el ingreso mensual total con la edad
 #y se adapta al ajuste de elevar al cuadrado la edad para encontrar un punto de inflexión.
@@ -70,20 +70,10 @@ eta_mod2.fn <-function(data_clean_ocu,index,
   b2<-coefs[2]
   b3<-coefs[3]
 
-  income<-b2*age_bar+b3*agesqr_bar
-  return(income)}
+  age<- -b2/(2*b3)
+  return(age)}
 
 
-
-
-f<-lm(y_total_m~age+ agesqr,data_clean_ocu)
-coefs<-f$coefficients
-b1<-coefs[1]
-b2<-coefs[2]
-b3<-coefs[3]
-b1
-b2
-b3
 
 results <- boot(data=data_clean_ocu, eta_mod2.fn,R=1000)
 results
@@ -91,35 +81,76 @@ results
 ic <- boot.ci(results,conf = 0.95, type="norm")
 ic
 
+### Si quisieramos observar efectos por género 
 
 
-View(data)
+data_clean_ocu_fem <- data_clean_ocu
+data_clean_ocu_fem$female <- with(data_clean_ocu_fem, ifelse(
+  sex == 1, 0, 1)) 
+data_clean_ocu_fem<- subset(data_clean_ocu_fem, data_clean_ocu_fem$female==1)
+data_clean_ocu_male<- subset(data_clean_ocu, data_clean_ocu$sex==1)
+data_clean_ocu_male$male <- with(data_clean_ocu_male, ifelse(
+  sex == 1, 0, 1)) 
 
-set.seed(10101) 
-sample1<-rbinom(n=100,size=1,p=.51) 
-sum(sample1) 
+reg_gap <- lm( LnIng~ age+ agesqr+female  , data=data_clean_ocu_fem)
+reg_ing_fem <- lm( y_total_m~age+ agesqr+female  , data=data_clean_ocu_fem)
+reg_ing_male <- lm( y_total_m~age+ agesqr+male  , data=data_clean_ocu_male)
 
-samples<-do(10000) * sum(rbinom(n=100,size=1,p=.51))
-samples<- samples %>% mutate(prop=sum/100)
-plot(hist(samples)) 
-require("boot")
+data_clean_ocu_fem$yhat_reg_gap<-predict(reg_gap)
+data_clean_ocu_fem$yhat_reg_fem<-predict(reg_ing_fem)
+data_clean_ocu_male$yhat_reg_male<-predict(reg_ing_male)
 
-boot(data,statistic,R)
+stargazer(reg_gap,reg_ing_fem,reg_ing_male,type="text") 
 
+plot(data_clean_ocu_fem$age,data_clean_ocu_fem$yhat_reg_gap)
+plot(data_clean_ocu_fem$age,data_clean_ocu_fem$yhat_reg_fem)
+plot(data_clean_ocu_male$age,data_clean_ocu_male$yhat_reg_male)
 
-
-#R= Replicaciones 
-
-eta.fin<- function(data,index{ 
-  coef(lm(consumption - price + income, data=data, subset=index))}) 
+eta_modfem.fn <-function(data_clean_ocu_fem,index,
+                       age_barfem=mean(data_clean_ocu_fem$age),
+                       agesqr_barfem=mean(data_clean_ocu_fem$agesqr))
+{
   
+  fem<-lm(y_total_m~age+ agesqr,data_clean_ocu_fem ,  subset = index)
+  coefs_fem<-fem$coefficients
+  b2_fem<-coefs_fem[2]
+  b3_fem<-coefs_fem[3]
   
+  age_fem<- -b2_fem/(2*b3_fem)
+  return(age_fem)}
+
+
+
+results_fem <- boot(data=data_clean_ocu_fem, eta_modfem.fn,R=1000)
+results_fem
+
+ic_fem <- boot.ci(results_fem,conf = 0.95, type="norm")
+ic_fem 
+
+
+eta_modmale.fn <-function(data_clean_ocu_male,index,
+                        age_barfem=mean(data_clean_ocu_male$age),
+                        agesqr_barfem=mean(data_clean_ocu_male$agesqr))
+{
   
+  male<-lm(y_total_m~age+ agesqr,data_clean_ocu_male ,  subset = index)
+  coefs_male<-male$coefficients
+  b2_male<-coefs_male[2]
+  b3_male<-coefs_male[3]
   
-  eta.mod2.fin <. function(data,index,
-                           price.bar=mean(gas$price),
-                           income.bar=mean(gas$income){
-                             f<-lm(consumption - income + price ´price2pprince.icnome,data,subet=index)
-                             
-                           }
+  age_male<- -b2_male/(2*b3_male)
+  return(age_male)}
+
+
+
+results_male <- boot(data=data_clean_ocu_male, eta_modmale.fn,R=1000)
+results_male
+
+ic_male <- boot.ci(results_male,conf = 0.95, type="norm")
+ic_male
+
+
+
+
+
                         

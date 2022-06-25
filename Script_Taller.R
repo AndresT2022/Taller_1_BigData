@@ -1,5 +1,5 @@
 #install.packages("recipes") 
-#rm=list(ls=()
+rm(list=ls()) 
 library(tidyverse)
 library(mosaic)
 library(recipes)
@@ -11,8 +11,8 @@ require("boot")
 ## Data Cleaning: Se toma la base se seleccionan 28 potenciales variables explicativas. La limpieza consiste en
 #a la vez elegir elementos de la muestra que cumplan con la condicional de estar ocupados, ser mayores de 18 años y vivir en Bogota (usar el dominio BOGOTA)
 
-data <- read.xlsx("C:\\Users\\DELL\\OneDrive - Universidad de los Andes\\MECA 2022_2023\\BIGDATA\\TALLERES\\Taller_1\\Database.xlsx",sheet="Sheet1")
-#data <- read.xlsx("D:\\Documents\\Andres\\ANDES\\2.5\\Taller_1_BigData\\Database.xlsx",sheet="Sheet1")
+#data <- read.xlsx("C:\\Users\\DELL\\OneDrive - Universidad de los Andes\\MECA 2022_2023\\BIGDATA\\TALLERES\\Taller_1\\Database.xlsx",sheet="Sheet1")
+data <- read.xlsx("D:\\Documents\\Andres\\ANDES\\2.5\\Taller_1_BigData\\Database.xlsx",sheet="Sheet1")
 
 
 data$LnIng <- log(data$y_total_m)
@@ -59,6 +59,14 @@ data_clean_ocu$yhat_reg2<-predict(reg2)
 stargazer(reg1,reg2,type="text") 
 
 plot(data_clean_ocu$age,data_clean_ocu$yhat_reg2)
+ggplot(data_clean_ocu,aes(x=age))+
+  geom_line(aes(y=yhat_reg2),colour="red")+
+  theme_classic()+
+  facet_grid()+
+  ggtitle("Modelo Ingreso ajustado por edad")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  labs(x="Edad", y="Ingreso")
+
 
 eta_mod2.fn <-function(data_clean_ocu,index,
                        age_bar=mean(data_clean_ocu$age),
@@ -93,18 +101,31 @@ data_clean_ocu_male$male <- with(data_clean_ocu_male, ifelse(
   sex == 1, 0, 1)) 
 
 reg_gap <- lm( LnIng~ age+ agesqr+female  , data=data_clean_ocu_fem)
+reg_ingreso<- lm( LnIng~ age+ agesqr  , data=data_clean_ocu_male)
 reg_ing_fem <- lm( y_total_m~age+ agesqr+female  , data=data_clean_ocu_fem)
 reg_ing_male <- lm( y_total_m~age+ agesqr+male  , data=data_clean_ocu_male)
 
 data_clean_ocu_fem$yhat_reg_gap<-predict(reg_gap)
 data_clean_ocu_fem$yhat_reg_fem<-predict(reg_ing_fem)
 data_clean_ocu_male$yhat_reg_male<-predict(reg_ing_male)
+data_clean_ocu_male$yhat_reg_gapmale<-predict(reg_ingreso)
 
 stargazer(reg_gap,reg_ing_fem,reg_ing_male,type="text") 
 
 plot(data_clean_ocu_fem$age,data_clean_ocu_fem$yhat_reg_gap)
 plot(data_clean_ocu_fem$age,data_clean_ocu_fem$yhat_reg_fem)
 plot(data_clean_ocu_male$age,data_clean_ocu_male$yhat_reg_male)
+
+ggplot(data_clean_ocu_fem,aes(x=age))+
+  geom_line(aes(y=yhat_reg_gap,colour="Femenino"), size=1)+
+  geom_line(data=data_clean_ocu_male,aes(y=yhat_reg_gapmale,colour="Masculino"), size=1)+
+  theme_classic()+
+  facet_grid()+
+  ggtitle("Modelo Ingreso analizado por género")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  labs(x="Edad", y="Ingreso")+
+  scale_color_manual(name = "Género", values = c("Masculino" = "red", "Femenino" = "violet"))
+
 
 eta_modfem.fn <-function(data_clean_ocu_fem,index,
                        age_barfem=mean(data_clean_ocu_fem$age),

@@ -150,6 +150,59 @@ ic_male <- boot.ci(results_male,conf = 0.95, type="norm")
 ic_male
 
 
+# Bootstrap
+library(ISLR2)
+set.seed(10101)
+count(data_clean_ocu)
+count(data_clean_ocu*.7)
+data_clean_ocu 
+training<-sample(13519, 9463)
+test<-
+
+lm.fit0<-lm(y_total_m~1, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit0, data_clean_ocu))[-training]^2)
+
+lm.fit<- lm(y_total_m~age, data=data_clean_ocu, subset = training)
+#mean squared error
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit, data_clean_ocu))[-training]^2)
+
+lm.fit1<- lm(y_total_m~Escol, data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit1, data_clean_ocu))[-training]^2)
+
+lm.fit2<- lm(y_total_m~age+agesqr, data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit2, data_clean_ocu))[-training]^2)
+
+lm.fit3<- lm(y_total_m~age+agesqr+Escol, data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit3, data_clean_ocu))[-training]^2)
+
+lm.fit4<- lm(y_total_m~poly(Escol, 2), data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit4, data_clean_ocu))[-training]^2)
+
+lm.fit5<- lm(y_total_m~poly(Escol, 3), data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit5, data_clean_ocu))[-training]^2)
+
+lm.fit6<- lm(y_total_m~exp, data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit6, data_clean_ocu))[-training]^2)
+
+lm.fit7<- lm(y_total_m~poly(exp, 2), data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit7, data_clean_ocu))[-training]^2)
+
+lm.fit8<- lm(y_total_m~Escol+exp+poly(exp, 2)+sex, data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit8, data_clean_ocu))[-training]^2)
+
+lm.fit9<- lm(y_total_m~Escol+exp+poly(exp, 2)+sex+age, data=data_clean_ocu, subset = training)
+attach(data_clean_ocu)
+mean((y_total_m - predict(lm.fit9, data_clean_ocu))[-training]^2)
 
 
 

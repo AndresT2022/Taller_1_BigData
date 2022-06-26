@@ -171,59 +171,8 @@ ic_male <- boot.ci(results_male,conf = 0.95, type="norm")
 ic_male
 
 
-# Bootstrap
-library(ISLR2)
-set.seed(10101)
-count(data_clean_ocu)
-count(data_clean_ocu*.7)
-data_clean_ocu 
-training<-sample(13519, 9463)
-test<-
+# Cross validation
 
-lm.fit0<-lm(y_total_m~1, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit0, data_clean_ocu))[-training]^2)
-
-lm.fit<- lm(y_total_m~age, data=data_clean_ocu, subset = training)
-#mean squared error
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit, data_clean_ocu))[-training]^2)
-
-lm.fit1<- lm(y_total_m~Escol, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit1, data_clean_ocu))[-training]^2)
-
-lm.fit2<- lm(y_total_m~age+agesqr, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit2, data_clean_ocu))[-training]^2)
-
-lm.fit3<- lm(y_total_m~age+agesqr+Escol, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit3, data_clean_ocu))[-training]^2)
-
-lm.fit4<- lm(y_total_m~poly(Escol, 2), data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit4, data_clean_ocu))[-training]^2)
-
-lm.fit5<- lm(y_total_m~poly(Escol, 3), data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit5, data_clean_ocu))[-training]^2)
-
-lm.fit6<- lm(y_total_m~exp, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit6, data_clean_ocu))[-training]^2)
-
-lm.fit7<- lm(y_total_m~poly(exp, 2), data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit7, data_clean_ocu))[-training]^2)
-
-lm.fit8<- lm(y_total_m~Escol+exp+poly(exp, 2)+sex, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit8, data_clean_ocu))[-training]^2)
-
-lm.fit9<- lm(y_total_m~Escol+exp+poly(exp, 2)+sex+age, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit9, data_clean_ocu))[-training]^2)
 
 #Punto 5.a
 #Selección muestra de entrenamiento y prueba
@@ -235,15 +184,15 @@ BD_train<-data_clean_ocu[id_train,]
 BD_test<-data_clean_ocu[-id_train,]
 #Numeral a.1 a a.4:
 #Modelos entrenamiento
-model_1<-lm(y_total_m~1,data = BD_train)
-model_2<-lm(y_total_m~age,data = BD_train)
-model_3<-lm(y_total_m~Escol,data = BD_train)
-model_4<-lm(y_total_m~age+agesqr,data = BD_train)
-model_5<-lm(y_total_m~age+agesqr+Escol,data = BD_train)
-model_6<-lm(y_total_m~exp,data = BD_train)
-model_7<-lm(y_total_m~poly(exp, 2),data = BD_train)
-model_8<-lm(y_total_m~Escol+poly(exp, 2)+sex,data = BD_train)
-model_9<-lm(y_total_m~Escol+poly(exp, 2)+sex+age,data = BD_train)
+model_1<-lm(LnIng~1,data = BD_train)
+model_2<-lm(LnIng~age,data = BD_train)
+model_3<-lm(LnIng~Escol,data = BD_train)
+model_4<-lm(LnIng~age+agesqr,data = BD_train)
+model_5<-lm(LnIng~age+agesqr+Escol,data = BD_train)
+model_6<-lm(LnIng~exp,data = BD_train)
+model_7<-lm(LnIng~poly(exp, 2),data = BD_train)
+model_8<-lm(LnIng~Escol+poly(exp, 2)+sex,data = BD_train)
+model_9<-lm(LnIng~Escol+poly(exp, 2)+sex+age,data = BD_train)
 #Modelos fuera de muestra
 BD_test$model_1<-predict(model_1,newdata = BD_test)
 BD_test$model_2<-predict(model_2,newdata = BD_test)
@@ -255,17 +204,41 @@ BD_test$model_7<-predict(model_7,newdata = BD_test)
 BD_test$model_8<-predict(model_8,newdata = BD_test)
 BD_test$model_9<-predict(model_9,newdata = BD_test)
 #MSE
-with(BD_test,mean((y_total_m-model_1)^2))
-with(BD_test,mean((y_total_m-model_2)^2))
-with(BD_test,mean((y_total_m-model_3)^2))
-with(BD_test,mean((y_total_m-model_4)^2))
-with(BD_test,mean((y_total_m-model_5)^2))
-with(BD_test,mean((y_total_m-model_6)^2))
-with(BD_test,mean((y_total_m-model_7)^2))
-with(BD_test,mean((y_total_m-model_8)^2))
-with(BD_test,mean((y_total_m-model_9)^2))
+mse01<-with(BD_test,mean((LnIng-model_1)^2))
+mse02<-with(BD_test,mean((LnIng-model_2)^2))
+mse03<-with(BD_test,mean((LnIng-model_3)^2))
+mse04<-with(BD_test,mean((LnIng-model_4)^2))
+mse05<-with(BD_test,mean((LnIng-model_5)^2))
+mse06<-with(BD_test,mean((LnIng-model_6)^2))
+mse07<-with(BD_test,mean((LnIng-model_7)^2))
+mse08<-with(BD_test,mean((LnIng-model_8)^2))
+mse09<-with(BD_test,mean((LnIng-model_9)^2))
+
+vmse1<-c(mse01,mse02,mse03,mse04,mse05,mse06,mse07,mse08,mse09)
+
+graf2<-ggplot(mapping = aes(x=1:9, y=vmse1))+
+  geom_line(color="blue")
+
 #Numeral a.5:
-# ni idea
+# ni idea --- a ver si sale con lo que dice Lucas
+ujs<-c()
+hjs<-c()
+alphas <- c()
+for (j in 1:nrow(BD_test)) {
+  uj <- model_9$residual[j]
+  hj <- lm.influence(model_9)$hat[j]
+  alpha <- uj/(1-hj)
+  alphas <- c(alphas, alpha)
+  ujs <- c(ujs, uj)
+  hjs <- c(hjs, hj)
+}
+
+alpha
+alphas
+ggplot(BD_test, aes(x=alphas, y=LnIng))+
+  geom_point(color="red")+
+  theme_classic()
+
 
 #Numeral b. K-fold cross-validation.
 install.packages("caret")
@@ -333,3 +306,4 @@ for (i in 1:13504) {
   # falta almacenar el MSE en una variable @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@q
   }
 
+#

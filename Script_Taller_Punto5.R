@@ -170,61 +170,6 @@ results_male
 ic_male <- boot.ci(results_male,conf = 0.95, type="norm")
 ic_male
 
-
-# Bootstrap
-library(ISLR2)
-set.seed(10101)
-count(data_clean_ocu)
-count(data_clean_ocu*.7)
-data_clean_ocu 
-training<-sample(13519, 9463)
-test<-
-
-lm.fit0<-lm(y_total_m~1, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit0, data_clean_ocu))[-training]^2)
-
-lm.fit<- lm(y_total_m~age, data=data_clean_ocu, subset = training)
-#mean squared error
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit, data_clean_ocu))[-training]^2)
-
-lm.fit1<- lm(y_total_m~Escol, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit1, data_clean_ocu))[-training]^2)
-
-lm.fit2<- lm(y_total_m~age+agesqr, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit2, data_clean_ocu))[-training]^2)
-
-lm.fit3<- lm(y_total_m~age+agesqr+Escol, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit3, data_clean_ocu))[-training]^2)
-
-lm.fit4<- lm(y_total_m~poly(Escol, 2), data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit4, data_clean_ocu))[-training]^2)
-
-lm.fit5<- lm(y_total_m~poly(Escol, 3), data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit5, data_clean_ocu))[-training]^2)
-
-lm.fit6<- lm(y_total_m~exp, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit6, data_clean_ocu))[-training]^2)
-
-lm.fit7<- lm(y_total_m~poly(exp, 2), data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit7, data_clean_ocu))[-training]^2)
-
-lm.fit8<- lm(y_total_m~Escol+exp+poly(exp, 2)+sex, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit8, data_clean_ocu))[-training]^2)
-
-lm.fit9<- lm(y_total_m~Escol+exp+poly(exp, 2)+sex+age, data=data_clean_ocu, subset = training)
-attach(data_clean_ocu)
-mean((y_total_m - predict(lm.fit9, data_clean_ocu))[-training]^2)
-
 #Punto 5.a
 #Selección muestra de entrenamiento y prueba
 library(ISLR2)
@@ -233,7 +178,7 @@ as.numeric(data_clean_ocu$Escol)
 id_train <- sample(1:nrow(data_clean_ocu),size = 0.7*nrow(data_clean_ocu), replace = F)
 BD_train<-data_clean_ocu[id_train,]
 BD_test<-data_clean_ocu[-id_train,]
-#Numeral a.1 a a.4:
+#Numeral a.1 a a.4
 #Modelos entrenamiento
 model_1<-lm(y_total_m~1,data = BD_train)
 model_2<-lm(y_total_m~age,data = BD_train)
@@ -276,7 +221,6 @@ model_1CV<-train(y_total_m~.,
                  data =  data_clean_ocu,
                  trControl=trainControl(method = "cv",number = 5),
                  method="null")
-
 model_1CV<-train(y_total_m~1,
                  data =  data_clean_ocu,
                  trControl=trainControl(method = "cv",number = 5),
@@ -285,6 +229,7 @@ model_2CV<-train(y_total_m~age,
                  data =  data_clean_ocu,
                  trControl=trainControl(method = "cv",number = 5),
                  method="lm")
+model_2CV
 model_3CV<-train(y_total_m~Escol,
                  data =  data_clean_ocu,
                  trControl=trainControl(method = "cv",number = 5),
@@ -315,10 +260,9 @@ model_9CV<-train(y_total_m~Escol+poly(exp, 2)+sex+age,
                  method="lm")
 
 #Numeral c. LOOCV
-dim(data_clean_ocu)#Hay 13504 observaciones
-
-#Falta validar ciclo que funcione bien @@@@@@@@@@@@@@@@@@@@@@@@@
-for (i in 1:13504) {
+##Crear variable que va a almacenar MSE
+data_clean_ocu$MSE_LOOCV <- 1
+for (i in 1:nrow(data_clean_ocu)) {
   #Establecer BD
   BD_train_LOOCV<-data_clean_ocu[-c(i),]
   dim(BD_train_LOOCV)
@@ -329,7 +273,6 @@ for (i in 1:13504) {
   #Modelo fuera de muestra
   BD_test_LOOCV$model_9LOOCV<-predict(model_9LOOCV,newdata = BD_test_LOOCV)
   #MSE
-  with(BD_test_LOOCV,mean((y_total_m-model_9LOOCV)^2))
-  # falta almacenar el MSE en una variable @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@q
+  data_clean_ocu$MSE_LOOCV[i]<-with(BD_test_LOOCV,mean((y_total_m-model_9LOOCV)^2))
   }
-
+mean(data_clean_ocu$MSE_LOOCV)

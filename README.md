@@ -18,12 +18,17 @@ por medio de los conceptos vistos en clase.
 Desarrollo
 
 1. Obtención y limpieza de datos
-   Pequeño párrafo de lo que se hizo
+   Se obtiene la base de datos GIEH contenida en la página https://ignaciomsarmiento.github.io/GEIH2018 sample/. 
+   Para extraer esta información se utilizan técnicas de web-scraping. La página no contiene restricciones de acceso para ningún robot.
+   Al momento de acceder a las tablas se encuentra que la base de datos no está contenida dentro de la pagína y el elementos aparece vacio 
+   cuando se hace la extracción. Sin embargo, la base de datos se encuentra disponible contenida en...
+   La limpieza de la base de datos requierió filtar por la edad y estado de ocupación de los participantes, para anilizar únicamente las personas mayores
+   de 18 años y estado de ocupación verdadero. 
    Pequeña conclusión
 2. Estimación de modelo y perfiles
    Pequeño párrafo de lo que se hizo
    Pequeña conclusión
-3. Existencias de frechas
+3. Existencias de brechas
    Pequeño párrafo de lo que se hizo
    Pequeña conclusión
 4. Predicción y comparación de modelos

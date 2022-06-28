@@ -23,8 +23,9 @@ Desarrollo
    Al momento de acceder a las tablas se encuentra que la base de datos no está contenida dentro de la pagína y el elementos aparece vacio 
    cuando se hace la extracción. Sin embargo, la base de datos se encuentra disponible contenida en...
    La limpieza de la base de datos requierió filtar por la edad y estado de ocupación de los participantes, para anilizar únicamente las personas mayores
-   de 18 años y estado de ocupación verdadero. 
-   Pequeña conclusión
+   de 18 años y estado de ocupación verdadero y habitantes de Bogotá. De esta forma se trabaja con una muestra de habitantes de Bogotá 
+   mayores de 18 años considerados ocupados laboralmente. 
+   
 2. Estimación de modelo y perfiles
    Pequeño párrafo de lo que se hizo
    Pequeña conclusión
@@ -32,8 +33,7 @@ Desarrollo
    Pequeño párrafo de lo que se hizo
    Pequeña conclusión
 4. Predicción y comparación de modelos
-   Pequeño párrafo de lo que se hizo
-   Pequeña conclusión
+   Se evalúan diferentes modelos utilizando Cross-validation, LOOCV y K-Fold
 
 
 
